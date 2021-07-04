@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Sales Management - Moses Adinfono's portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo"><strong>MOSES</strong> <span>ADINFONO</span></a>
+					</header>
+
+				<!-- Main -->
+					<div id="main" class="alt">
+
+						<!-- One -->
+							<section id="one">
+								<div class="inner">
+									<header class="major">
+										<h1>Sales Management</h1>
+									</header>
+									
+									<h3>Business Request & User Stories</h3>
+									
+									<p>The business request for this project was an executive sales report for sales managers. Based on the request that was made from the business, we followed user stories (were defined) to fulfill delivery and ensure that acceptance criteria were maintained throughout the project.</p>
+									<img src="images/table.png" alt="" />
+									
+									<h3>Data Cleansing & Transformation (SQL)</h3>
+									
+									<p>To create the necessary data model for doing analysis and fulfilling the business needs defined in the user stories, the following tables were extracted using SQL.The sales budget data was provided in Excel format and was later connected (by data modeling) to the data extracted from the database.</p>
+									
+									<p>Below are the SQL statements for cleansing and transforming necessary data.</p>
+									
+<!-- Code Start -->
+<h5>DIM_Calendar:</h5>
+							
+<pre><code>
+-- Cleansed DIM_Date Table --
+
+SELECT
+	[DateKey],
+	[FullDateAlternateKey] AS Date,
+	[EnglishDayNameOfWeek] AS Day,
+	[EnglishMonthName] AS Month,
+	Left([EnglishMonthName], 3) AS MonthShort,   -- Useful for front end date navigation and front end graphs.
+	[MonthNumberOfYear] AS MonthNo,
+	[CalendarQuarter] AS Quarter,
+	[CalendarYear] AS Year --[CalendarSemester],
+FROM
+	[AdventureWorksDW2019].[dbo].[DimDate]
+WHERE
+	CalendarYear >= 2019
+</code></pre>
+<!-- Code End -->
+
+								
+
+<!-- Code Start -->
+<h5>DIM_Products:</h5>
+<pre><code>
+-- Cleansed DIM_Products Table --
+
+SELECT
+	p.[ProductKey], 
+	p.[ProductAlternateKey] AS ProductItemCode, 
+	p.[EnglishProductName] AS [Product Name], 
+	ps.EnglishProductSubcategoryName AS [Sub Category], -- Joined in from Sub Category Table
+	pc.EnglishProductCategoryName AS [Product Category], -- Joined in from Category Table
+	p.[Color] AS [Product Color], 
+	p.[Size] AS [Product Size], 
+	p.[ProductLine] AS [Product Line], 
+	p.[ModelName] AS [Product Model Name], 
+	p.[EnglishDescription] AS [Product Description],  
+	ISNULL (p.Status, 'Outdated') AS [Product Status] 
+FROM 
+	[AdventureWorksDW2019].[dbo].[DimProduct] as p
+	LEFT JOIN dbo.DimProductSubcategory AS ps ON ps.ProductSubcategoryKey = p.ProductSubcategoryKey 
+	LEFT JOIN dbo.DimProductCategory AS pc ON ps.ProductCategoryKey = pc.ProductCategoryKey 
+ORDER BY 
+	p.ProductKey ASC
+</code></pre>
+<!-- Code End -->
+
+<!-- Code Start -->
+<h5>FACT_InternetSales:</h5>
+<pre><code>
+-- Cleansed FACT_InternetSales Table --
+
+SELECT 
+	[ProductKey], 
+	[OrderDateKey], 
+	[DueDateKey], 
+	[ShipDateKey], 
+	[CustomerKey],
+	[SalesOrderNumber],
+	[SalesAmount] 
+FROM 
+	[AdventureWorksDW2019].[dbo].[FactInternetSales]
+WHERE 
+	LEFT (OrderDateKey, 4) >= YEAR(GETDATE()) -2 -- Ensures we always only bring two years of date from extraction.
+ORDER BY
+	OrderDateKey ASC
+</code></pre>
+<!-- Code End -->
+
+<h3>Data Model (Power BI)</h3>
+
+<p>Below is a screenshot of the data model after cleansed and prepared tables were read into Power BI. This data model also shows how FACT_Budget has been connected to FACT_InternetSales and other necessary DIM tables.</p>
+
+<span class="image main"> <img src="images/powerbi_model.png" alt=""/></span>
+
+<h3>Sales Management Dashboard (Power BI)</h3>
+
+<p>The finished sales management dashboard with one page with works as a dashboard and overview, with two other pages focused on combining tables for necessary details and visualizations to show sales over time, per customers and per products.</p>
+
+<h5>Click the image below to open and interact with the dashboard.</h5>
+
+<span class="image main"><a href="https://app.powerbi.com/view?r=eyJrIjoiNjA3MmE0NzEtYzgxZC00Yjk3LTg3NTQtNzU0ZWI2NDViYjRjIiwidCI6IjI5NWRiOTczLWUwZDQtNGJjMy1hMGM1LWUwZjE2NWNlYzA3ZSJ9&pageName=ReportSection" class="image" target="_blank">
+	<img src="images/powerbi_db.png" alt=""/>
+</a></span>
+
+
+</div>
+</section>
+				<!-- Footer -->
+				<footer id="footer">
+					<div class="inner">
+						<ul class="icons">
+							<li><a href="https://github.com/Moses-Adinfono" target="_blank" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							<li><a href="https://www.linkedin.com/in/adinfono-moses-5608b6141/" target="_blank" class="icon brands alt fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						</ul>
+					</div>
+				</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
